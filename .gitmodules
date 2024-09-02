@@ -1,0 +1,10 @@
+[submodule "submodules/riscv-unified-db"]
+	path = submodules/riscv-unified-db
+	url = https://github.com/riscv-software-src/riscv-unified-db
+[submodule "submodules/helper-to-tcg"]
+	path = submodules/helper-to-tcg
+	url = https://github.com/revng/qemu-upstream
+[submodule "submodules/xqci"]
+	path = submodules/xqci
+	url = https://github.com/revng/qemu-upstream
+	branch = feature/xqci

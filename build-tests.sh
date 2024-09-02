@@ -1,0 +1,43 @@
+#!/bin/sh
+
+clangpp=$1
+klee=$2
+dir=$3
+
+klee_bc_dir=${dir}/bc
+klee_out_dir=${dir}/out
+klee_exes_dir=${dir}/exes
+klee_io_dir=${dir}/io
+
+[ ! -d ${klee_bc_dir} ] && mkdir ${klee_bc_dir}
+[ ! -d ${klee_out_dir} ] && mkdir ${klee_out_dir}
+[ ! -d ${klee_exes_dir} ] && mkdir ${klee_exes_dir}
+[ ! -d ${klee_io_dir} ] && mkdir ${klee_io_dir}
+
+for file in ${dir}/*.cpp; do
+    no_ext=${file%.*}
+    basename=${no_ext##*/}
+
+    echo "  ${basename}"
+    echo "    - Compiling klee .cpp input -> .bc"
+    $clangpp $file -emit-llvm -c -g -O0 -Xclang -disable-O0-optnone -I include -I build -o ${klee_bc_dir}/${basename}.bc
+
+    echo "    - Running klee"
+    $klee --external-calls=all \
+          --only-output-states-covering-new \
+          --libc=uclibc \
+          --posix-runtime \
+          --use-merge \
+          --output-dir=${klee_out_dir}/${basename} \
+          ${klee_bc_dir}/${basename}.bc \
+          &> ${dir}/klee-out
+
+    echo "    - Compiling test executable"
+    $clangpp $file -lkleeRuntest -I include -I build -o ${klee_exes_dir}/${basename}
+
+    for test in ${klee_out_dir}/${basename}/*.ktest; do
+        echo "    - Collecting test ${test}"
+        KTEST_FILE=$test ./${klee_exes_dir}/${basename} >> ${klee_io_dir}/${basename}
+    done
+done
+
