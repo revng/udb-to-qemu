@@ -8,3 +8,9 @@
 	path = submodules/xqci
 	url = https://github.com/revng/qemu-upstream
 	branch = feature/xqci
+[submodule "submodules/embench"]
+	path = submodules/embench
+	url = https://github.com/embench/embench-iot
+[submodule "submodules/picolibc"]
+	path = submodules/picolibc
+	url = https://github.com/picolibc/picolibc
