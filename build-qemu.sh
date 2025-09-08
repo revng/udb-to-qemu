@@ -9,10 +9,9 @@ qemu=$(realpath ./submodules/xqci/)
 [ ! -d ${build_qemu} ] && mkdir ${build_qemu}
 
 cd ${build_qemu} && ${qemu}/configure \
-    --target-list="riscv32-linux-user" \
+    --target-list="riscv32-linux-user riscv32-softmmu" \
     --disable-kvm \
     --disable-tools \
-    --disable-system \
     --disable-libnfs \
     --disable-vde \
     --disable-gnutls \
