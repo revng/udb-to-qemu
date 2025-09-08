@@ -1,0 +1,60 @@
+#!/bin/sh
+
+[ ! -d build ] && exit
+
+cp build/xqci-16.decode submodules/xqci/target/riscv/xqci/
+cp build/xqci-32.decode submodules/xqci/target/riscv/xqci/
+cp build/xqci-48.decode submodules/xqci/target/riscv/xqci/
+cp build/smrnmi-32.decode submodules/xqci/target/riscv/smrnmi/
+cp build/xqccmp-16.decode submodules/xqci/target/riscv/xqccmp/
+
+cp build/xqci-tcg.c submodules/xqci/target/riscv/xqci/
+cp build/xqci-tcg.h submodules/xqci/target/riscv/xqci/
+cp build/xqci-trans-decode.c.inc submodules/xqci/target/riscv/xqci/
+cp build/xqci-csr.c submodules/xqci/target/riscv/xqci/
+cp build/xqci-csr.h submodules/xqci/target/riscv/xqci/
+
+cp build/xqccmp-tcg.c submodules/xqci/target/riscv/xqccmp/
+cp build/xqccmp-tcg.h submodules/xqci/target/riscv/xqccmp/
+cp build/xqccmp-trans-decode.c.inc submodules/xqci/target/riscv/xqccmp/
+
+cp build/smrnmi-tcg.c submodules/xqci/target/riscv/smrnmi
+cp build/smrnmi-tcg.h submodules/xqci/target/riscv/smrnmi
+cp build/smrnmi-trans-decode.c.inc submodules/xqci/target/riscv/smrnmi
+cp build/smrnmi-csr.c submodules/xqci/target/riscv/smrnmi
+cp build/smrnmi-csr.h submodules/xqci/target/riscv/smrnmi
+
+cp xqci-tcg-manual.c.inc submodules/xqci/target/riscv/xqci/
+cp xqci-helper.h submodules/xqci/target/riscv/xqci/
+
+# Disas
+cp build/riscv-xqci.c submodules/xqci/disas/
+cp build/riscv-xqci.h submodules/xqci/disas/
+cp build/riscv-xqci-16-decode.c.inc submodules/xqci/disas/
+cp build/riscv-xqci-32-decode.c.inc submodules/xqci/disas/
+cp build/riscv-xqci-48-decode.c.inc submodules/xqci/disas/
+cp build/riscv-xqci-trans-disas.c.inc submodules/xqci/disas/
+
+cp build/riscv-xqccmp.c submodules/xqci/disas/
+cp build/riscv-xqccmp.h submodules/xqci/disas/
+cp build/riscv-xqccmp-16-decode.c.inc submodules/xqci/disas/
+cp build/riscv-xqccmp-trans-disas.c.inc submodules/xqci/disas/
+
+cp build/riscv-smrnmi.c submodules/xqci/disas/
+cp build/riscv-smrnmi.h submodules/xqci/disas/
+cp build/riscv-smrnmi-32-decode.c.inc submodules/xqci/disas/
+cp build/riscv-smrnmi-trans-disas.c.inc submodules/xqci/disas/
+
+# Testing
+rm -r submodules/xqci/tests/tcg/riscv32/klee_io
+rm -r submodules/xqci/tests/tcg/riscv32/Xqci
+mkdir submodules/xqci/tests/tcg/riscv32/klee_io
+cp -r build/klee/xqci/io submodules/xqci/tests/tcg/riscv32/klee_io/xqci/
+cp -r build/klee/xqccmp/io submodules/xqci/tests/tcg/riscv32/klee_io/xqccmp/
+cp -r build/klee/smrnmi/io submodules/xqci/tests/tcg/riscv32/klee_io/smrnmi/
+cp -r submodules/riscv-unified-db/spec/custom/isa/qc_iu/inst/Xqci/ submodules/xqci/tests/tcg/riscv32/
+cp -r submodules/riscv-unified-db/spec/custom/isa/qc_iu/inst/Xqccmp/ submodules/xqci/tests/tcg/riscv32/
+cp -r submodules/riscv-unified-db/spec/std/isa/inst/Smrnmi/ submodules/xqci/tests/tcg/riscv32/
+cp scripts/assemble.py submodules/xqci/tests/tcg/riscv32/
+cp scripts/c.py submodules/xqci/tests/tcg/riscv32/
+cp scripts/common.py submodules/xqci/tests/tcg/riscv32/
