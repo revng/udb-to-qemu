@@ -20,20 +20,19 @@ for file in ${dir}/*.cpp; do
 
     echo "  ${basename}"
     echo "    - Compiling klee .cpp input -> .bc"
-    $clangpp $file -emit-llvm -c -g -O0 -Xclang -disable-O0-optnone -I include -I build -o ${klee_bc_dir}/${basename}.bc
+    $clangpp $file -std=c++20 -emit-llvm -c -g -O0 -Xclang -disable-O0-optnone -I cpp-templates -I include -I build -o ${klee_bc_dir}/${basename}.bc
 
     echo "    - Running klee"
     $klee --external-calls=all \
           --only-output-states-covering-new \
           --libc=uclibc \
           --posix-runtime \
-          --use-merge \
           --output-dir=${klee_out_dir}/${basename} \
           ${klee_bc_dir}/${basename}.bc \
           &> ${dir}/klee-out
 
     echo "    - Compiling test executable"
-    $clangpp $file -lkleeRuntest -I include -I build -o ${klee_exes_dir}/${basename}
+    $clangpp $file -std=c++20 -g -lkleeRuntest -I cpp-templates -I include -I build -o ${klee_exes_dir}/${basename}
 
     for test in ${klee_out_dir}/${basename}/*.ktest; do
         echo "    - Collecting test ${test}"
