@@ -1,13 +1,15 @@
 [submodule "submodules/riscv-unified-db"]
 	path = submodules/riscv-unified-db
-	url = https://github.com/riscv-software-src/riscv-unified-db
+	url = https://github.com/AntonJohansson/riscv-unified-db
+	branch = qemu
 [submodule "submodules/helper-to-tcg"]
 	path = submodules/helper-to-tcg
 	url = https://github.com/revng/qemu-upstream
+	branch = feature/helper-to-tcg-develop
 [submodule "submodules/xqci"]
 	path = submodules/xqci
 	url = https://github.com/revng/qemu-upstream
-	branch = feature/xqci
+	branch = feature/xqci-v1.1
 [submodule "submodules/embench"]
 	path = submodules/embench
 	url = https://github.com/embench/embench-iot
