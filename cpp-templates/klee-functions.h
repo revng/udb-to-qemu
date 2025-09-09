@@ -1,3 +1,16 @@
+//
+// Functions required for C++ input to interface correctly with KLEE.
+// Provides dummy branches for load, stores, and jumps to enable test
+// test generation.
+//
+// Copyright (c) 2025 rev.ng Labs Srl.
+//
+// This work is licensed under the terms of the GNU GPL, version 2 or
+// (at your option) any later version.
+//
+// See the LICENSE file in the top-level directory for details.
+//
+
 #pragma once
 
 #include <assert.h>

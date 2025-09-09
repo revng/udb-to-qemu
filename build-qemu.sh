@@ -1,5 +1,17 @@
 #!/bin/sh
 
+#
+# Helper script to build riscv32 QEMU binaries with user and
+# system mode support.
+#
+# Copyright (c) 2025 rev.ng Labs Srl.
+#
+# This work is licensed under the terms of the GNU GPL, version 2 or
+# (at your option) any later version.
+#
+# See the LICENSE file in the top-level directory for details.
+#
+
 set -e
 
 build_qemu=build/qemu

@@ -1,5 +1,18 @@
 #!/usr/bin/env python3
 
+#
+# Produce a simple inline assembly C test from KLEE test definitions.
+# Requires toolchain with assembly support. A single instruction is
+# tested for expected # inputs/outputs found by KLEE.
+#
+# Copyright (c) 2025 rev.ng Labs Srl.
+#
+# This work is licensed under the terms of the GNU GPL, version 2 or
+# (at your option) any later version.
+#
+# See the LICENSE file in the top-level directory for details.
+#
+
 import argparse
 import yaml
 import re

@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 
+#
+# Assemble a simple test binary from a KLEE yaml test definitions,
+# no toolchain required. A single instruction is tested for expected
+# inputs/outputs found by KLEE, one ELF binary is produced per
+# test case.
+#
+# Copyright (c) 2025 rev.ng Labs Srl.
+#
+# This work is licensed under the terms of the GNU GPL, version 2 or
+# (at your option) any later version.
+#
+# See the LICENSE file in the top-level directory for details.
+#
+
 import argparse
 import yaml
 import re

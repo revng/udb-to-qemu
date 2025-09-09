@@ -1,3 +1,14 @@
+/*
+ * Xqci manual helper function definitions.
+ *
+ * Copyright (c) 2025 rev.ng Labs Srl.
+ *
+ * This work is licensed under the terms of the GNU GPL, version 2 or
+ * (at your option) any later version.
+ *
+ * See the LICENSE file in the top-level directory for details.
+ */
+
 #include "exec/cpu_ldst.h"
 #include "exec/address-spaces.h"
 

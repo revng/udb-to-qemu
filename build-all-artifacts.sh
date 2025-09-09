@@ -1,5 +1,16 @@
 #!/bin/sh
 
+#
+# Main script to build all artifacts required for a QEMU frontend.
+#
+# Copyright (c) 2025 rev.ng Labs Srl.
+#
+# This work is licensed under the terms of the GNU GPL, version 2 or
+# (at your option) any later version.
+#
+# See the LICENSE file in the top-level directory for details.
+#
+
 clangpp=$1
 klee=$2
 llvm_config=$3

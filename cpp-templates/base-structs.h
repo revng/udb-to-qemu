@@ -1,3 +1,15 @@
+//
+// Main Bits<> required for modeling the IDL, along with auxiliary
+// structures for representing ranges and a set of registers.
+//
+// Copyright (c) 2025 rev.ng Labs Srl.
+//
+// This work is licensed under the terms of the GNU GPL, version 2 or
+// (at your option) any later version.
+//
+// See the LICENSE file in the top-level directory for details.
+//
+
 #pragma once
 
 #include <algorithm>
