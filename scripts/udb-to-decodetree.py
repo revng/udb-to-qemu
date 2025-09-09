@@ -160,7 +160,8 @@ def main():
                                     length = 1
                                     start = offset
 
-                                start += common.round_to_power_of_two(size) - size
+                                start += common.round_to_power_of_two(
+                                    size) - size
                                 ranges.append(f'{start}:{length}')
                                 names.append(f'{start}_{length}')
 
@@ -201,14 +202,14 @@ def main():
                     # Sanity check
                     for subfield in v:
                         if subfield not in {
-                                'name',
-                                'not',
-                                'location',
-                                'sign_extend',
-                                'left_shift'  # left shift is handled in trans_*()
-                            }:
+                            'name',
+                            'not',
+                            'location',
+                            'sign_extend',
+                            'left_shift'  # left shift is handled in trans_*()
+                        }:
                             print(f'Unhandled field in variable {subfield}')
-                            assert(False)
+                            assert (False)
 
                     for i, r in enumerate(common.ranges_in_location(v['location'])):
                         start, length = r

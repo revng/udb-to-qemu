@@ -23,9 +23,11 @@ from math import ceil
 from ctypes import c_int32
 import common
 
+
 expected_reg = 8
 dst_reg = 9
 address_reg = 10
+
 
 def ashr32(x, n):
     if x & 0x80000000:
@@ -129,7 +131,8 @@ class InstPrinter:
             len_expected = len(encoding['variables'])
             len_got = len(args)
             if len_got != len_expected:
-                print(f'error: {inst} expected {len_expected} args got {len_got}')
+                print(f'error: {inst} expected {
+                      len_expected} args got {len_got}')
                 return
 
             for i, v in enumerate(encoding['variables']):
@@ -161,10 +164,13 @@ class InstPrinter:
             self.bytes += bytes.fromhex('13050002')     # li      a0, 0x20
             self.bytes += bytes.fromhex('13000000')     # nop
             self.bytes += bytes.fromhex('0100')         # nop
-            self.bytes += bytes.fromhex('1310f001')     # slli    zero, zero, 0x1f
+            # slli    zero, zero, 0x1f
+            self.bytes += bytes.fromhex('1310f001')
             self.bytes += bytes.fromhex('73001000')     # ebreak
-            self.bytes += bytes.fromhex('13507040')     # srai    zero, zero, 0x7
-            self.bytes += bytes.fromhex('6f000000')     # j       0x800000ac <_exit+0x32>
+            # srai    zero, zero, 0x7
+            self.bytes += bytes.fromhex('13507040')
+            # j       0x800000ac <_exit+0x32>
+            self.bytes += bytes.fromhex('6f000000')
         else:
             self.bytes += bytes.fromhex('9308d005')  # li a7 93
             self.bytes += bytes.fromhex('73000000')  # ecall
@@ -178,22 +184,22 @@ class InstPrinter:
         self.exit()
 
     def check_result(self, expected_result):
-        self.li(expected_result, expected_reg) # 8 bytes in size
-        self.bytes += bytes.fromhex('63089400') # beq s0,s1,16
-        self.exit_failure() # 12 bytes in size
+        self.li(expected_result, expected_reg)  # 8 bytes in size
+        self.bytes += bytes.fromhex('63089400')  # beq s0,s1,16
+        self.exit_failure()  # 12 bytes in size
 
     def check_branch_and_result(self, expected_result):
         # Hard code checking of expected vs returned value.
         # Only testing against state in returned register.
         self.bytes += bytes.fromhex('6f000001')  # j 16
-        self.li(expected_result, expected_reg) # 8 bytes in size
+        self.li(expected_result, expected_reg)  # 8 bytes in size
         self.bytes += bytes.fromhex('63089400')  # beq x8,x9,16
-        self.exit_failure() # 12 bytes in size
+        self.exit_failure()  # 12 bytes in size
 
     def check_branch(self):
         self.bytes += bytes.fromhex('6f008000')  # j 8
         self.bytes += bytes.fromhex('6f000001')  # j 16
-        self.exit_failure() # 12 bytes in size
+        self.exit_failure()  # 12 bytes in size
 
 
 def output_elf(f, text_bytes):
@@ -205,7 +211,7 @@ def output_elf(f, text_bytes):
     f.write(struct.pack('<I', 1))                  # Version
     # Entry point (dummy address)
     f.write(struct.pack('<I', 0x10000+52+2*32))
-    #f.write(struct.pack('<I', 0x80000000))             # Virtual address
+    # f.write(struct.pack('<I', 0x80000000))             # Virtual address
     f.write(struct.pack('<I', 52))                 # Program header offset
     f.write(struct.pack('<I', 0))                  # Section header offset
     f.write(struct.pack('<I', 0))                  # Flags
@@ -222,8 +228,8 @@ def output_elf(f, text_bytes):
     f.write(struct.pack('<I', 0))                  # Offset in the file
     f.write(struct.pack('<I', 0x1000))             # Virtual address
     f.write(struct.pack('<I', 0x1000))             # Physical address
-    #f.write(struct.pack('<I', 0x80000000))             # Virtual address
-    #f.write(struct.pack('<I', 0x80000000))             # Physical address
+    # f.write(struct.pack('<I', 0x80000000))             # Virtual address
+    # f.write(struct.pack('<I', 0x80000000))             # Physical address
     # Size of the segment in the file
     f.write(struct.pack('<I', 0))
     # Size of the segment in memory
@@ -279,7 +285,7 @@ def main():
     vars = common.variables(y)
     var_map = common.variable_map(y)
 
-    for test_index,test in enumerate(io_yaml):
+    for test_index, test in enumerate(io_yaml):
         printer.bytes = bytes()
 
         expected_result = None
@@ -290,7 +296,7 @@ def main():
         if 'has_valid_test_memop' in test and test['has_valid_test_memop'] == 0:
             continue
 
-        #for i in range(0,32):
+        # for i in range(0,32):
         #    printer.li(i, i)
         printer.li(0x2800, 2)
 
@@ -343,9 +349,10 @@ def main():
                 printer.check_result(storeop['value'])
 
         printer.exit_success()
-                
+
         with open(f'{args.out}-{test_index}', 'wb') as f:
             output_elf(f, printer.bytes)
+
 
 if __name__ == '__main__':
     main()

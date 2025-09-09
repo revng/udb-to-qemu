@@ -148,13 +148,13 @@ def main():
 
             with open(klee_file, 'w') as out:
                 out.write('#include <klee/klee.h>\n')
-                out.write(f'#define INST_SIZE {int(len(y['encoding']['match'])/8)}')
+                out.write(f'#define INST_SIZE {
+                          int(len(y['encoding']['match'])/8)}')
                 out.write(klee_str_includes)
 
                 out_csr(out, csrs)
 
                 out.write(preamble)
-
 
                 vars = []
                 var_names = []
@@ -169,7 +169,8 @@ def main():
                         var_names.append(v['name'])
                 out.write('\n')
 
-                out.write(f"void {re.sub(r'\.', r'_', name)}({', '.join(vars)}) {{\n")
+                out.write(f"void {re.sub(r'\.', r'_', name)
+                                  }({', '.join(vars)}) {{\n")
                 op = y['operation()']
                 op = common.op_to_cpp(op, csrs, True)
                 out.write(op)
@@ -198,9 +199,11 @@ def main():
                     if is_imm:
                         imm_name = f'imm_{name}'
                         out.write(f'uint{cs}_t {imm_name};\n')
-                        out.write(f'klee_make_symbolic(&{imm_name}, sizeof({imm_name}), "{imm_name}");\n')
+                        out.write(
+                            f'klee_make_symbolic(&{imm_name}, sizeof({imm_name}), "{imm_name}");\n')
                         if 'sign_extend' in v or f'$signed({v["name"]})' in op:
-                            out.write(f"{imm_name} = sextract{cs}({imm_name}, 0, {var_size});\n")
+                            out.write(f"{imm_name} = sextract{
+                                      cs}({imm_name}, 0, {var_size});\n")
                         if 'left_shift' in v:
                             out.write(f"{imm_name} <<= {v['left_shift']};\n")
                         out.write(f'Bits<{var_size}> {name}({imm_name});\n')
@@ -209,8 +212,10 @@ def main():
 
                     elif 'rd' not in name:
                         out.write(f'uint{cs}_t {name};\n')
-                        out.write(f'klee_make_symbolic(&{name}, sizeof({name}), "{name}");\n')
-                        compressed_offset = 8 if common.var_is_compressed(op, name) else 0
+                        out.write(
+                            f'klee_make_symbolic(&{name}, sizeof({name}), "{name}");\n')
+                        compressed_offset = 8 if common.var_is_compressed(
+                            op, name) else 0
                         offset = i+1+compressed_offset
                         print_info[name] = ('reg', offset, False)
                         out.write(f'cpu.X[{offset}] = {name};\n')
@@ -218,8 +223,10 @@ def main():
 
                     else:
                         out.write(f'uint{cs}_t {name};\n')
-                        out.write(f'klee_make_symbolic(&{name}, sizeof({name}), "{name}");\n')
-                        compressed_offset = 8 if common.var_is_compressed(op, name) else 0
+                        out.write(
+                            f'klee_make_symbolic(&{name}, sizeof({name}), "{name}");\n')
+                        compressed_offset = 8 if common.var_is_compressed(
+                            op, name) else 0
                         offset = i+1+compressed_offset
                         print_info[name] = ('reg', offset, True)
                         out.write(f'cpu.X[{offset}] = {name};\n')
@@ -227,7 +234,8 @@ def main():
 
                     if 'not' in v:
                         not_strs = []
-                        not_values = v['not'] if isinstance(v['not'], list) else [v['not']]
+                        not_values = v['not'] if isinstance(
+                            v['not'], list) else [v['not']]
                         for n in not_values:
                             not_strs.append(f'({name} != {n})')
                         out.write(f'klee_assume({" && ".join(not_strs)});\n')
@@ -237,7 +245,8 @@ def main():
                     is_imm = common.var_is_imm(y['operation()'], name)
                     var_size = common.var_size(v) if is_imm else 32
                     if var_size < 32 or var_size > 32 and var_size < 64:
-                        out.write(f'klee_assume({name} <= ((1ul << {var_size})-1));\n')
+                        out.write(
+                            f'klee_assume({name} <= ((1ul << {var_size})-1));\n')
 
                 out.write(f"cpu.{op_name}({', '.join(call_args)}")
                 out.write(');\n')
@@ -249,35 +258,43 @@ def main():
                     if kind == 'reg':
                         out.write(f'printf("    in: %u\\n", {name});\n')
                     elif kind == 'imm':
-                        out.write(f'printf("    in: %u\\n", {name}.value());\n')
+                        out.write(
+                            f'printf("    in: %u\\n", {name}.value());\n')
                     else:
-                        assert(False)
+                        assert (False)
 
                     if is_output and kind == 'reg':
-                        out.write(f'printf("    out: %u\\n", cpu.X[{offset}].value());\n')
+                        out.write(
+                            f'printf("    out: %u\\n", cpu.X[{offset}].value());\n')
 
                 out.write('printf("  overflow: %u\\n", overflow);\n')
                 out.write('printf("  underflow: %u\\n", underflow);\n')
                 out.write('if (has_jump) {\n')
                 out.write('    printf("  has_jump:\\n");\n')
-                out.write('    printf("    valid_test_jump: %u\\n", has_valid_test_jump);\n')
-                out.write('    printf("    jump_pc_offset: %u\\n", jump_pc_offset);\n')
+                out.write(
+                    '    printf("    valid_test_jump: %u\\n", has_valid_test_jump);\n')
+                out.write(
+                    '    printf("    jump_pc_offset: %u\\n", jump_pc_offset);\n')
                 out.write('}\n')
                 out.write('if (has_load) {\n')
-                out.write('    printf("  has_valid_test_memop: %u\\n", has_valid_test_memop);\n')
+                out.write(
+                    '    printf("  has_valid_test_memop: %u\\n", has_valid_test_memop);\n')
                 out.write('    printf("  has_load:\\n");\n')
                 out.write('    for (auto &P : rmemory) {\n')
                 out.write('        printf("  - address: %u\\n", P.first);\n')
-                out.write('        printf("    value: %u\\n", P.second.value);\n')
+                out.write(
+                    '        printf("    value: %u\\n", P.second.value);\n')
                 out.write('        printf("    size: %u\\n", P.second.size);\n')
                 out.write('    }\n')
                 out.write('}\n')
                 out.write('if (has_store) {\n')
-                out.write('    printf("  has_valid_test_memop: %u\\n", has_valid_test_memop);\n')
+                out.write(
+                    '    printf("  has_valid_test_memop: %u\\n", has_valid_test_memop);\n')
                 out.write('    printf("  has_store:\\n");\n')
                 out.write('    for (auto &P : wmemory) {\n')
                 out.write('        printf("  - address: %u\\n", P.first);\n')
-                out.write('        printf("    value: %u\\n", P.second.value);\n')
+                out.write(
+                    '        printf("    value: %u\\n", P.second.value);\n')
                 out.write('        printf("    size: %u\\n", P.second.size);\n')
                 out.write('    }\n')
                 out.write('}\n')

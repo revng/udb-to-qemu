@@ -26,7 +26,7 @@ expected_reg = 8
 dst_reg = 9
 address_reg = 10
 
-func_exit="""
+func_exit = """
 __attribute__((noreturn))
 void exit(int code) {
     __asm__ volatile("addi a0, %0, 0\\n"
@@ -36,7 +36,7 @@ void exit(int code) {
 }
 """
 
-func_check="""
+func_check = """
 void check(int cond) {
     if (!cond) {
         exit(255);
@@ -96,6 +96,7 @@ skip_insn = {
     'qc.cm.popfp',
 }
 
+
 def ashr32(x, n):
     if x & 0x80000000:
         return (x >> n) | (0xFFFFFFFF << (32 - n))
@@ -139,7 +140,8 @@ class CPrinter:
             len_expected = len(encoding['variables'])
             len_got = len(args)
             if len_got != len_expected:
-                print(f'error: {inst} expected {len_expected} args got {len_got}')
+                print(f'error: {inst} expected {
+                      len_expected} args got {len_got}')
                 return
 
             for i, v in enumerate(encoding['variables']):
@@ -159,8 +161,6 @@ class CPrinter:
         enc_len = len(encoding['match'])
         num_bytes = ceil(enc_len/8)
         self.bytes += struct.pack('<Q', enc)[0:num_bytes]
-
-
 
 
 def output_elf(f, text_bytes):
@@ -237,7 +237,7 @@ def main():
                 io_var_map[v['name']] = v
 
     # Skip non arithmetic tests
-    for test_index,test in enumerate(io_yaml):
+    for test_index, test in enumerate(io_yaml):
         if 'has_jump' in test:
             return
 
@@ -263,12 +263,12 @@ def main():
         printer.line('void _start() {')
         printer.set_indent(4)
 
-        tmp_index = 0;
-        for test_index,test in enumerate(io_yaml):
+        tmp_index = 0
+        for test_index, test in enumerate(io_yaml):
             expected_result = None
 
             # TODO(anjo): Not testing jumps in C yet
-            #if 'has_jump' in test:
+            # if 'has_jump' in test:
             #    if test['has_jump']['valid_test_jump'] == 0:
             #        continue
 
@@ -277,8 +277,10 @@ def main():
 
             if 'has_load' in test:
                 for loadop in test['has_load']:
-                    printer.line(f'intptr_t address{tmp_index} = {loadop["address"]};')
-                    printer.line(f'*(uint32_t *)address{tmp_index} = {loadop["value"]};')
+                    printer.line(f'intptr_t address{tmp_index} = {
+                                 loadop["address"]};')
+                    printer.line(
+                        f'*(uint32_t *)address{tmp_index} = {loadop["value"]};')
                     tmp_index += 1
 
             out_args = []
@@ -328,22 +330,23 @@ def main():
 
                         if var['name'].startswith('r') and var['name'].endswith('s'):
                             reg_s_index += 1
-                            printer.line(f'register unsigned int {name} asm("s{reg_s_index}") = {value};')
+                            printer.line(f'register unsigned int {
+                                         name} asm("s{reg_s_index}") = {value};')
                         else:
                             printer.line(f'unsigned int {name} = {value};')
-                        
+
                         tmp_index += 1
 
                 num_vars = len(test['variables'])
-                fmts = [f'%{i}' for i in range(0,num_vars)]
+                fmts = [f'%{i}' for i in range(0, num_vars)]
                 fmt = ', '.join(fmts)
 
                 asm = y['assembly']
-                for i,v in enumerate(variable_order):
+                for i, v in enumerate(variable_order):
                     name = v
 
                     remap_names = {
-                        'width_minus1' : 'width',
+                        'width_minus1': 'width',
                     }
 
                     if name in remap_names:
@@ -353,25 +356,28 @@ def main():
 
                     asm = asm.replace(name, f'%{i}')
 
-            fmt_out = [f'"{r}"({o})'for r,o in out_args]
-            fmt_in = [f'"{r}"({o})'for r,o in in_args]
-            printer.line(f'__asm__ volatile("{args.inst_name} {asm}" : {", ".join(fmt_out)} : {", ".join(fmt_in)} :);')
+            fmt_out = [f'"{r}"({o})'for r, o in out_args]
+            fmt_in = [f'"{r}"({o})'for r, o in in_args]
+            printer.line(f'__asm__ volatile("{args.inst_name} {asm}" : {
+                         ", ".join(fmt_out)} : {", ".join(fmt_in)} :);')
             if expected_result != None:
-                for _,o in out_args:
+                for _, o in out_args:
                     printer.line(f'check({o} == {expected_result});')
 
             if 'has_store' in test:
                 for storeop in test['has_store']:
-                    printer.line(f'intptr_t address{tmp_index} = {storeop["address"]};')
+                    printer.line(f'intptr_t address{tmp_index} = {
+                                 storeop["address"]};')
                     fs = "F"*int(2*int(storeop["size"])/8)
-                    printer.line(f'check((*(uint32_t*)address{tmp_index} & 0x{fs}) == {storeop["value"]});')
+                    printer.line(
+                        f'check((*(uint32_t*)address{tmp_index} & 0x{fs}) == {storeop["value"]});')
                     tmp_index += 1
 
         printer.line('exit(0);')
         printer.set_indent(0)
         printer.line('}')
 
-    #for test_index,test in enumerate(io_yaml):
+    # for test_index,test in enumerate(io_yaml):
     #    printer.bytes = bytes()
 
     #    expected_result = None
@@ -428,7 +434,7 @@ def main():
     #            printer.check_result(storeop['value'])
 
     #    printer.exit_success()
-    #            
+    #
     #    #printer.li(69, 6)
     #    #printer.li(0x1234, 7)
     #    #printer.append('sw', 0, 7, 6)

@@ -53,7 +53,6 @@ def main():
     parser.add_argument('--out-decode', required=True)
     args = parser.parse_args()
 
-
     instructions = {}
     for file in sorted(os.listdir(args.inst_dir)):
         if not should_translate(file) and not should_decode_only(file):
@@ -67,13 +66,14 @@ def main():
             y = instructions[inst]
             name = y['name']
             op_name = re.sub(r'\.', r'_', name)
-            out.write(f'static bool trans_{op_name}(DisasContext *ctx, arg_{op_name} *arg)\n')
+            out.write(f'static bool trans_{
+                      op_name}(DisasContext *ctx, arg_{op_name} *arg)\n')
             out.write('{\n')
 
             if name in common.system_only:
-                 out.write('#ifdef CONFIG_USER_ONLY\n')
-                 out.write('    return false;\n')
-                 out.write('#else\n')
+                out.write('#ifdef CONFIG_USER_ONLY\n')
+                out.write('    return false;\n')
+                out.write('#else\n')
 
             out.write('#ifndef TARGET_RISCV32\n')
             out.write('    return false;\n')
@@ -91,24 +91,29 @@ def main():
                     extensions.append(e['name'])
                 else:
                     extensions.append(e)
-            assert(len(extensions) > 0)
+            assert (len(extensions) > 0)
             print(f'{file} {extensions}')
-            out.write(f'    if ({' && '.join([f"!ctx->cfg_ptr->ext_{e.lower()}" for e in extensions])}) {{\n')
+            out.write(f'    if ({' && '.join(
+                [f"!ctx->cfg_ptr->ext_{e.lower()}" for e in extensions])}) {{\n')
             out.write(f'        return false;\n')
             out.write(f'    }}\n')
 
             str_args = []
             if 'variables' in y['encoding']:
-                str_args = [f"arg->{v['name']}" for v in y['encoding']['variables']]
+                str_args = [
+                    f"arg->{v['name']}" for v in y['encoding']['variables']]
                 for v in y['encoding']['variables']:
                     if 'not' in v:
-                        not_values = v['not'] if isinstance(v['not'], list) else [v['not']]
-                        conditions = [f"arg->{v['name']} == {n}" for n in not_values]
+                        not_values = v['not'] if isinstance(
+                            v['not'], list) else [v['not']]
+                        conditions = [
+                            f"arg->{v['name']} == {n}" for n in not_values]
                         out.write(f"    if ({' || '.join(conditions)}) {{\n")
-                        out.write( "        return false;\n")
-                        out.write( "    }\n")
+                        out.write("        return false;\n")
+                        out.write("    }\n")
                     if 'left_shift' in v:
-                        out.write(f"    arg->{v['name']} <<= {v['left_shift']};\n")
+                        out.write(
+                            f"    arg->{v['name']} <<= {v['left_shift']};\n")
 
             out.write(f'    emit_{op_name}(ctx, tcg_env')
             if len(str_args) > 0:
@@ -117,14 +122,14 @@ def main():
             out.write(');\n')
 
             if 'jump_halfword' in y['operation()']:
-                out.write('    gen_goto_tb(ctx, 0, ctx->cur_insn_len);\n');
+                out.write('    gen_goto_tb(ctx, 0, ctx->cur_insn_len);\n')
 
             out.write('    return true;\n')
 
             out.write('#endif\n')
 
             if name in common.system_only:
-                 out.write('#endif\n')
+                out.write('#endif\n')
 
             out.write('}\n')
 
@@ -133,13 +138,14 @@ def main():
             y = instructions[inst]
             name = y['name']
             op_name = re.sub(r'\.', r'_', name)
-            out.write(f'static bool trans_{op_name}(rv_decode *dec, arg_{op_name} *arg)\n')
+            out.write(f'static bool trans_{
+                      op_name}(rv_decode *dec, arg_{op_name} *arg)\n')
             out.write('{\n')
 
             if name in common.system_only:
-                 out.write('#ifdef CONFIG_USER_ONLY\n')
-                 out.write('    return false;\n')
-                 out.write('#else\n')
+                out.write('#ifdef CONFIG_USER_ONLY\n')
+                out.write('    return false;\n')
+                out.write('#else\n')
 
             extensions = []
             extensions_yaml = []
@@ -153,56 +159,64 @@ def main():
                     extensions.append(e['name'])
                 else:
                     extensions.append(e)
-            assert(len(extensions) > 0)
+            assert (len(extensions) > 0)
             print(f'{file} {extensions}')
-            out.write(f'    if ({' && '.join([f"!dec->cfg->ext_{e.lower()}" for e in extensions])}) {{\n')
+            out.write(f'    if ({' && '.join(
+                [f"!dec->cfg->ext_{e.lower()}" for e in extensions])}) {{\n')
             out.write(f'        return false;\n')
             out.write(f'    }}\n')
 
             str_args = []
             if 'variables' in y['encoding']:
-                str_args = [f"arg->{v['name']}" for v in y['encoding']['variables']]
+                str_args = [
+                    f"arg->{v['name']}" for v in y['encoding']['variables']]
                 for v in y['encoding']['variables']:
                     if 'not' in v:
-                        not_values = v['not'] if isinstance(v['not'], list) else [v['not']]
-                        conditions = [f"arg->{v['name']} == {n}" for n in not_values]
+                        not_values = v['not'] if isinstance(
+                            v['not'], list) else [v['not']]
+                        conditions = [
+                            f"arg->{v['name']} == {n}" for n in not_values]
                         out.write(f"    if ({' || '.join(conditions)}) {{\n")
-                        out.write( "        return false;\n")
-                        out.write( "    }\n")
+                        out.write("        return false;\n")
+                        out.write("    }\n")
                     if 'left_shift' in v:
-                        out.write(f"    arg->{v['name']} <<= {v['left_shift']};\n")
+                        out.write(
+                            f"    arg->{v['name']} <<= {v['left_shift']};\n")
 
                 used_fields = set()
                 for v in y['encoding']['variables']:
                     remap_fields = {
-                        'rlist' : 'uimm',
-                        'slist' : 'uimm',
-                        'shamt' : 'uimm',
-                        'width_minus1' : 'imm1',
-                        'r1s' : 'rs1',
-                        'r2s' : 'rs2',
-                        'simm' : 'imm1',
-                        'simm1' : 'imm',
-                        'simm2' : 'imm1',
-                        'length' : 'imm1',
-                        'spimm' : 'imm',
+                        'rlist': 'uimm',
+                        'slist': 'uimm',
+                        'shamt': 'uimm',
+                        'width_minus1': 'imm1',
+                        'r1s': 'rs1',
+                        'r2s': 'rs2',
+                        'simm': 'imm1',
+                        'simm1': 'imm',
+                        'simm2': 'imm1',
+                        'length': 'imm1',
+                        'spimm': 'imm',
                     }
-                    field = remap_fields[v['name']] if v['name'] in remap_fields else v['name']
+                    field = remap_fields[v['name']
+                                         ] if v['name'] in remap_fields else v['name']
                     if field in used_fields:
                         print(f'{name} field {field} used already in disas/')
                     used_fields.add(field)
                     if not common.var_is_imm(y['operation()'], name) and common.inst_is_compressed(y):
-                        out.write(f"    dec->{field} = arg->{v['name']} + 8;\n")
+                        out.write(
+                            f"    dec->{field} = arg->{v['name']} + 8;\n")
                     else:
                         out.write(f"    dec->{field} = arg->{v['name']};\n")
 
             out.write(f'    dec->op = rv_op_{op_name};\n')
-            out.write( '    return true;\n')
+            out.write('    return true;\n')
 
             if name in common.system_only:
-                 out.write('#endif\n')
+                out.write('#endif\n')
 
             out.write('}\n')
+
 
 if __name__ == '__main__':
     main()

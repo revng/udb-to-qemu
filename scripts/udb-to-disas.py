@@ -68,7 +68,8 @@ def main():
         out.write(f'#ifndef DISAS_RISCV_{args.disas_name.upper()}_H\n')
         out.write(f'#define DISAS_RISCV_{args.disas_name.upper()}_H\n')
         out.write('\n')
-        out.write(f'extern const rv_opcode_data {args.disas_name}_opcode_data[];\n')
+        out.write(f'extern const rv_opcode_data {
+                  args.disas_name}_opcode_data[];\n')
         out.write(f'void decode_{args.disas_name}(rv_decode *, rv_isa);\n')
         out.write('\n')
         out.write('#endif\n')
@@ -81,9 +82,10 @@ def main():
         out.write('\n')
 
         out.write('typedef enum {\n')
-        for i,inst in enumerate(instructions):
+        for i, inst in enumerate(instructions):
             y = instructions[inst]
-            variables = y['encoding']['variables'] if 'variables' in y['encoding'] else []
+            variables = y['encoding']['variables'] if 'variables' in y['encoding'] else [
+            ]
             op_name = re.sub(r'\.', r'_', y['name'])
             if i == 0:
                 out.write(f'    rv_op_{op_name} = 1,\n')
@@ -92,37 +94,40 @@ def main():
         out.write(f'}} rv_{args.disas_name}_opcode;\n')
         out.write('\n')
 
-        out.write(f'const rv_opcode_data {args.disas_name}_opcode_data[] = {{\n')
-        out.write('    { "qc.illegal", rv_codec_illegal, rv_fmt_none, NULL, 0, 0, 0 },\n')
+        out.write(f'const rv_opcode_data {
+                  args.disas_name}_opcode_data[] = {{\n')
+        out.write(
+            '    { "qc.illegal", rv_codec_illegal, rv_fmt_none, NULL, 0, 0, 0 },\n')
         for inst in instructions:
             y = instructions[inst]
-            variables = y['encoding']['variables'] if 'variables' in y['encoding'] else []
+            variables = y['encoding']['variables'] if 'variables' in y['encoding'] else [
+            ]
             fmt_args = []
             for v in reversed(variables):
                 fmt = {
-                    'rd' : '0',
-                    'rs1' : '1',
-                    'rs2' : '2',
-                    'rs3' : '6',
-                    'r1s' : '1',
-                    'r2s' : '2',
-                    'uimm' : 'k',
-                    'shamt' : 'k',
-                    'shamt' : 'k',
-                    'rlist' : 'k',
-                    'slist' : 'k',
-                    'width_minus1' : 'j',
-                    'imm' : 'i',
-                    'simm' : 'j',
-                    'simm1' : 'i',
-                    'simm2' : 'j',
-                    'spimm' : 'i',
-                    'length' : 'j',
-                    'offset' : 'Z',
+                    'rd': '0',
+                    'rs1': '1',
+                    'rs2': '2',
+                    'rs3': '6',
+                    'r1s': '1',
+                    'r2s': '2',
+                    'uimm': 'k',
+                    'shamt': 'k',
+                    'shamt': 'k',
+                    'rlist': 'k',
+                    'slist': 'k',
+                    'width_minus1': 'j',
+                    'imm': 'i',
+                    'simm': 'j',
+                    'simm1': 'i',
+                    'simm2': 'j',
+                    'spimm': 'i',
+                    'length': 'j',
+                    'offset': 'Z',
                 }
                 if v['name'] not in fmt:
                     print(f"Unhandled variable fmt {v['name']}")
-                    print(f"For inst:");
+                    print(f"For inst:")
                     print(f"{y}")
                     continue
 
@@ -130,7 +135,8 @@ def main():
 
             fmt_str = f"O\\t{','.join(fmt_args)}"
             name = y['name']
-            out.write(f"    {{ \"{name}\", rv_codec_skip, \"{fmt_str}\", NULL, 0, 0, 0 }},\n")
+            out.write(
+                f"    {{ \"{name}\", rv_codec_skip, \"{fmt_str}\", NULL, 0, 0, 0 }},\n")
         out.write("};\n")
 
         out.write("\n")
@@ -140,7 +146,8 @@ def main():
         for s in sizes:
             if s == 16 or s == 32:
                 continue
-            out.write(f'static uint64_t decode_{args.disas_name}_{s}_impl_load_bytes(rv_decode *dec, uint64_t insn, int offset, int length)\n')
+            out.write(f'static uint64_t decode_{args.disas_name}_{
+                      s}_impl_load_bytes(rv_decode *dec, uint64_t insn, int offset, int length)\n')
             out.write('{\n')
             out.write('    return 0;\n')
             out.write('}\n')
@@ -154,9 +161,10 @@ def main():
             if non_standard_size:
                 out.write('#pragma GCC diagnostic pop\n')
         out.write(f'#include "{args.trans_disas}"\n')
-        out.write('\n');
+        out.write('\n')
 
-        out.write(f'void decode_{args.disas_name}(rv_decode *dec, rv_isa isa) {{\n')
+        out.write(f'void decode_{
+                  args.disas_name}(rv_decode *dec, rv_isa isa) {{\n')
         out.write('    rv_inst inst = dec->inst;\n')
         out.write('    dec->op = rv_op_illegal;\n')
         out.write('    switch (dec->inst_length) {\n')
@@ -164,7 +172,8 @@ def main():
             out.write(f'    case {int(s/8)}:\n')
             if s == 48:
                 out.write(f'        inst <<= (64-48);\n')
-            out.write(f'        decode_{args.disas_name}_{s}_impl(dec, inst);\n')
+            out.write(f'        decode_{args.disas_name}_{
+                      s}_impl(dec, inst);\n')
             out.write('        break;\n')
         out.write('    }\n')
         out.write('}\n')
