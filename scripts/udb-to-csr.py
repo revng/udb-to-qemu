@@ -79,12 +79,14 @@ def main():
             out.write('    return RISCV_EXCP_NONE;\n')
             out.write('}\n')
 
-        out.write(f'void {args.name}_register_custom_csrs(RISCVCPU *cpu)\n')
-        out.write('{\n')
+        out.write('const RISCVCSR xqci_csr_list[] = {\n')
         for csr in csrs:
             csr_name = re.sub(r'\.', r'_', csr)
-            out.write(f"    riscv_set_csr_ops(CSR_{csr_name.upper()}, &(riscv_csr_operations){{\"{
-                      csr_name}\", pred_{csr_name}, NULL, NULL, rmw_{csr_name}}});\n")
+            out.write('    {\n')
+            out.write(f"    .csrno = CSR_{csr_name.upper()},\n")
+            out.write(f"    .csr_ops = {{\"{csr_name}\", pred_{
+                      csr_name}, NULL, NULL, rmw_{csr_name}}},\n")
+            out.write('    },\n')
         out.write('}\n')
 
     with open(args.out_h, 'w') as out:

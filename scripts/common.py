@@ -42,9 +42,19 @@ decode_only = {
 }
 
 system_only = {
-    # 'qc.c.mienter',
-    # 'qc.c.mienter.nest',
-    # 'qc.c.mileaveret',
+    'qc.c.mienter',
+    'qc.c.mienter.nest',
+    'qc.c.mileaveret',
+    'qc.c.sync',
+    'qc.c.syncr',
+    'qc.c.syncwf',
+    'qc.c.syncwl',
+    'qc.sync',
+    'qc.syncr',
+    'qc.syncwf',
+    'qc.syncwl',
+    'qc.inw',
+    'qc.outw',
 }
 
 

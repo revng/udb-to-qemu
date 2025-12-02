@@ -9,8 +9,8 @@
  * See the LICENSE file in the top-level directory for details.
  */
 
-#include "exec/cpu_ldst.h"
-#include "exec/address-spaces.h"
+#include "system/memory.h"
+#include "system/address-spaces.h"
 
 #ifdef TARGET_RISCV32
 void HELPER(xqci_swm)(CPUArchState *env, target_ulong vaddr, target_ulong length, int rs3)
@@ -51,6 +51,16 @@ void HELPER(xqci_setwm)(CPUArchState *env, target_ulong vaddr, target_ulong leng
     }
 }
 
+#ifndef CONFIG_USER_ONLY
+static void xqci_set_mode(CPUArchState *env, int mode)
+{
+#ifndef CONFIG_USER_ONLY
+    riscv_cpu_set_mode(env, mode, env->virt_enabled);
+#else
+    env->priv = mode;
+#endif
+}
+
 static void mienter_copy_cpustate(CPUArchState *env, uintptr_t ra)
 {
     /* TODO(anjo): validate env->gpr[2] */
@@ -73,7 +83,7 @@ static void mienter_copy_cpustate(CPUArchState *env, uintptr_t ra)
         riscv_raise_exception(env, ret, ra);
     }
 
-    ret = riscv_csrr(env, CSR_QC_MCAUSE, &qc_mcause);
+    ret = riscv_csrr(env, CSR_MCAUSE, &qc_mcause);
     if (ret != RISCV_EXCP_NONE) {
         riscv_raise_exception(env, ret, ra);
     }
@@ -122,15 +132,6 @@ void HELPER(xqci_mienter_nest)(CPUArchState *env)
     mienter_copy_cpustate(env, GETPC());
     env->mstatus = set_field(env->mstatus, MSTATUS_MIE, 1);
     env->qc_mcause = qc_mcause_val | (1 << 26);
-}
-
-static void xqci_set_mode(CPUArchState *env, int mode)
-{
-#ifndef CONFIG_USER_ONLY
-    riscv_cpu_set_mode(env, mode, env->virt_enabled);
-#else
-    env->priv = mode;
-#endif
 }
 
 void HELPER(xqci_mileaveret)(CPUArchState *env)
@@ -246,6 +247,7 @@ static void emit_qc_c_mileaveret(DisasContext *ctx, TCGv_env tcg_env)
 {
     gen_helper_xqci_mileaveret(tcg_env);
 }
+#endif /* !CONFIG_USER_ONLY */
 
 static TCGv xqci_ea(DisasContext *ctx, int rs1, int imm)
 {
@@ -302,6 +304,8 @@ static void emit_qc_setwmi(DisasContext *ctx, TCGv_env tcg_env, int imm, int rs1
     gen_helper_xqci_setwm(tcg_env, vaddr, tcg_constant_tl(length), value);
 }
 
+
+#ifndef CONFIG_USER_ONLY
 /*
 uint8_t sync_bitmask(int slist)
 {
@@ -371,24 +375,6 @@ static void emit_qc_syncwl(DisasContext *ctx, TCGv_env tcg_env, int slist)
     /* sync_write_after_read_device(true,imm); */
 }
 
-static void emit_qc_csrrwr(DisasContext *ctx, TCGv_env tcg_env, int rs2, int rs1, int rd)
-{
-    TCGv csr = get_gpr(ctx, rs2, EXT_NONE);
-    if (rd != 0) {
-        gen_helper_csrr(dest_gpr(ctx, rd), tcg_env, csr);
-    }
-    gen_helper_csrw(tcg_env, csr, get_gpr(ctx, rs1, EXT_NONE));
-}
-
-static void emit_qc_csrrwri(DisasContext *ctx, TCGv_env tcg_env, int rs2, int imm, int rd)
-{
-    TCGv csr = get_gpr(ctx, rs2, EXT_NONE);
-    if (rd != 0) {
-        gen_helper_csrr(dest_gpr(ctx, rd), tcg_env, csr);
-    }
-    gen_helper_csrw(tcg_env, csr, tcg_constant_tl((uint32_t)imm));
-}
-
 void HELPER(xqci_outw)(CPUArchState *env, target_ulong address, target_ulong value)
 {
 #ifndef CONFIG_USER_ONLY
@@ -423,6 +409,25 @@ static void emit_qc_outw(DisasContext *ctx, TCGv_env tcg_env, int imm, int rs1, 
     TCGv value = get_gpr(ctx, rs2, EXT_NONE);
     translator_io_start(&ctx->base);
     gen_helper_xqci_outw(tcg_env, addr, value);
+}
+#endif /* !CONFIG_USER_ONLY */
+
+static void emit_qc_csrrwr(DisasContext *ctx, TCGv_env tcg_env, int rs2, int rs1, int rd)
+{
+    TCGv csr = get_gpr(ctx, rs2, EXT_NONE);
+    if (rd != 0) {
+        gen_helper_csrr(dest_gpr(ctx, rd), tcg_env, csr);
+    }
+    gen_helper_csrw(tcg_env, csr, get_gpr(ctx, rs1, EXT_NONE));
+}
+
+static void emit_qc_csrrwri(DisasContext *ctx, TCGv_env tcg_env, int rs2, int imm, int rd)
+{
+    TCGv csr = get_gpr(ctx, rs2, EXT_NONE);
+    if (rd != 0) {
+        gen_helper_csrr(dest_gpr(ctx, rd), tcg_env, csr);
+    }
+    gen_helper_csrw(tcg_env, csr, tcg_constant_tl((uint32_t)imm));
 }
 
 #endif

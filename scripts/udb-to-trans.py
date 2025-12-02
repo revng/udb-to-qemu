@@ -70,12 +70,11 @@ def main():
                       op_name}(DisasContext *ctx, arg_{op_name} *arg)\n')
             out.write('{\n')
 
+            ifdef_cond = '!defined(TARGET_RISCV32)'
             if name in common.system_only:
-                out.write('#ifdef CONFIG_USER_ONLY\n')
-                out.write('    return false;\n')
-                out.write('#else\n')
+                ifdef_cond += ' || defined(CONFIG_USER_ONLY)'
 
-            out.write('#ifndef TARGET_RISCV32\n')
+            out.write(f'#if {ifdef_cond}\n')
             out.write('    return false;\n')
             out.write('#else\n')
 
@@ -121,15 +120,9 @@ def main():
                 out.write(', '.join(str_args))
             out.write(');\n')
 
-            if 'jump_halfword' in y['operation()']:
-                out.write('    gen_goto_tb(ctx, 0, ctx->cur_insn_len);\n')
-
             out.write('    return true;\n')
 
-            out.write('#endif\n')
-
-            if name in common.system_only:
-                out.write('#endif\n')
+            out.write(f'#endif /* {ifdef_cond} */\n')
 
             out.write('}\n')
 
@@ -141,11 +134,6 @@ def main():
             out.write(f'static bool trans_{
                       op_name}(rv_decode *dec, arg_{op_name} *arg)\n')
             out.write('{\n')
-
-            if name in common.system_only:
-                out.write('#ifdef CONFIG_USER_ONLY\n')
-                out.write('    return false;\n')
-                out.write('#else\n')
 
             extensions = []
             extensions_yaml = []
@@ -211,9 +199,6 @@ def main():
 
             out.write(f'    dec->op = rv_op_{op_name};\n')
             out.write('    return true;\n')
-
-            if name in common.system_only:
-                out.write('#endif\n')
 
             out.write('}\n')
 
