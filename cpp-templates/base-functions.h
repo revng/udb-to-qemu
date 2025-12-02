@@ -86,6 +86,9 @@ struct CPUArchState;
 
 __attribute__((annotate("immediate: 0"))) void ann_xqci_jump_pcrel(int imm) {}
 __attribute__((annotate("immediate: 0"))) void xqci_jump_pcrel(int imm);
+__attribute__((annotate("immediate: 0"))) void ann_xqci_jump_conditional_pcrel(int imm) {}
+__attribute__((annotate("immediate: 0"))) void xqci_jump_conditional_pcrel(int imm);
+
 __attribute__((annotate("returns-immediate"))) uint64_t ann_xqci_current_pc() {
     return 0;
 }
